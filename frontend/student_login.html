@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Login | BIO-PASS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 80px;
+      background-color: #f0f2f5;
+    }
+    form {
+      display: inline-block;
+      text-align: left;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input {
+      display: block;
+      width: 300px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    button {
+      width: 320px;
+      padding: 10px;
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #msg {
+      color: red;
+    }
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>Student Login</h1>
+  <form id="loginForm">
+    <label for="email">Email ID:</label>
+    <input type="email" id="email" required />
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required />
+
+    <button type="submit">Login</button>
+    <p id="msg"></p>
+  </form>
+
+  <script>
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/student/login", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        localStorage.setItem("studentEmail", email);
+        alert("Login successful!");
+        window.location.href = "request_permission.html";
+      } else {
+        document.getElementById("msg").innerText = result.detail || "Login failed";
+      }
+    } catch (err) {
+      document.getElementById("msg").innerText = "Something went wrong.";
+    }
+  });
+</script>
+<footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+</body>
+</html>

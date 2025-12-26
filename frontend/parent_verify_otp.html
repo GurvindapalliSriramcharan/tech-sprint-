@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Parent OTP Verification | BIO-PASS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding-top: 80px;
+      text-align: center;
+    }
+    form {
+      display: inline-block;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input {
+      display: block;
+      width: 300px;
+      margin: 10px 0;
+      padding: 10px;
+    }
+    button {
+      width: 320px;
+      padding: 10px;
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #msg {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>Parent OTP Verification</h1>
+  <form id="otpForm">
+    <label for="email">Student Email:</label>
+    <input type="email" id="email" name="email" required />
+
+    <label for="otp">Enter OTP</label>
+    <input type="text" id="otp" name="otp" required />
+
+    <button type="submit">Verify</button>
+    <p id="msg"></p>
+  </form>
+
+  <script>
+    document.getElementById("otpForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const otp = document.getElementById("otp").value;
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/parent/verify-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+  student_email: email,  // ✅ use correct field name
+  otp: otp
+})
+
+        });
+
+        const result = await response.json();
+        const msgElem = document.getElementById("msg");
+
+        if (response.ok) {
+          msgElem.className = "success";
+          msgElem.innerText = "✅ " + result.message;
+        } else {
+          msgElem.className = "error";
+          msgElem.innerText = "❌ " + (result.detail || "Verification failed.");
+        }
+
+      } catch (error) {
+        const msgElem = document.getElementById("msg");
+        msgElem.className = "error";
+        msgElem.innerText = "❌ Something went wrong.";
+        console.error(error);
+      }
+    });
+  </script>
+   <footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+</body>
+</html>
