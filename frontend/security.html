@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Security Face Verification</title>
+
+    <script src="https://unpkg.com/face-api.js"></script>
+
+    <style>
+
+        body { font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 20px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+
+        th { background-color: #eee; }
+
+        #video { width: 320px; height: 240px; margin-top: 10px; border: 2px solid #333; }
+
+        #camera-section { margin-top: 20px; display: none; }
+
+        #message { font-weight: bold; margin-top: 15px; color: #007bff; }
+
+        button { padding: 8px 15px; }
+
+
+        footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+    
+    </style>
+
+</head>
+
+<body>
+
+
+<h2>Pending Outing Requests (Faculty Approved)</h2>
+
+<div id="message"></div>
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>Email</th>
+
+            <th>Reason</th>
+
+            <th>From</th>
+
+            <th>To</th>
+
+            <th>Action</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody id="requests-body">
+
+        <!-- Filled dynamically -->
+
+    </tbody>
+
+</table>
+
+
+<div id="camera-section">
+
+    <h3>Face Verification</h3>
+
+    <video id="video" autoplay muted></video><br>
+
+    <button id="verify-btn">Capture & Verify</button>
+
+</div>
+
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+
+<script>
+
+    let selectedEmail = "";
+
+
+    async function loadRequests() {
+
+        const res = await fetch("http://127.0.0.1:8000/security/pending-verifications");
+
+        const data = await res.json();
+
+        const body = document.getElementById("requests-body");
+
+        body.innerHTML = "";
+
+
+        if (data.requests.length === 0) {
+
+            body.innerHTML = "<tr><td colspan='5'>No pending verifications.</td></tr>";
+
+            return;
+
+        }
+
+
+        data.requests.forEach(req => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+
+                <td>${req.email}</td>
+
+                <td>${req.reason}</td>
+
+                <td>${req.from}</td>
+
+                <td>${req.to}</td>
+
+                <td><button onclick="startCamera('${req.email}')">Verify Face</button></td>
+
+            `;
+
+            body.appendChild(row);
+
+        });
+
+    }
+
+
+    function startCamera(email) {
+
+        selectedEmail = email;
+
+        document.getElementById("camera-section").style.display = "block";
+
+        document.getElementById("message").innerText = "";
+
+
+        const video = document.getElementById("video");
+
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+
+            .then(stream => video.srcObject = stream)
+
+            .catch(err => {
+
+                console.error("Camera error:", err);
+
+                document.getElementById("message").innerText = "Error accessing camera.";
+
+            });
+
+    }
+
+
+    document.getElementById("verify-btn").addEventListener("click", async function (e) {
+
+        e.preventDefault(); // ✅ This is key — prevent reload!
+
+
+        const video = document.getElementById("video");
+
+        const canvas = document.getElementById("canvas");
+
+        const context = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth;
+
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+
+        const formData = new FormData();
+
+        formData.append("image", blob, "capture.jpg");
+
+        formData.append("email", selectedEmail);
+
+
+        try {
+
+            const res = await fetch("http://127.0.0.1:8000/security/verify-face", {
+
+                method: "POST",
+
+                body: formData
+
+            });
+
+            const result = await res.json();
+
+
+            const msgDiv = document.getElementById("message");
+
+            msgDiv.innerText = result.message;
+
+
+           /* if (result.message.includes("✅")) {
+
+                setTimeout(() => {
+
+                    location.reload();
+
+                }, 2000);
+
+            }*/
+
+        } catch (err) {
+
+            document.getElementById("message").innerText = "Verification failed. Try again.";
+
+            console.error("Error during face verify:", err);
+
+        }
+
+    });
+
+
+    loadRequests();
+
+</script>
+<footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+
+</body>
+
+</html>

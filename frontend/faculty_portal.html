@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Faculty Portal | BIO-PASS</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .card { border: 1px solid #aaa; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+    button { margin-right: 10px; }
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>Faculty Pending Approvals</h1>
+  <div id="requests"></div>
+
+  <script>
+    async function loadRequests() {
+      const res = await fetch("http://127.0.0.1:8000/faculty/pending-requests");
+      const data = await res.json();
+      const container = document.getElementById("requests");
+
+      data.requests.forEach(req => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <p><strong>Email:</strong> ${req.email}</p>
+          <p><strong>Reason:</strong> ${req.reason}</p>
+          <p><strong>From:</strong> ${req.from}</p>
+          <p><strong>To:</strong> ${req.to}</p>
+          <form onsubmit="handleDecision(event, ${req.id}, 'Faculty Approved')">
+            <button type="submit">✅ Approve</button>
+          </form>
+          <form onsubmit="handleDecision(event, ${req.id}, 'Faculty Rejected')">
+            <button type="submit">❌ Reject</button>
+          </form>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function handleDecision(event, id, decision) {
+      event.preventDefault();
+      const res = await fetch("http://127.0.0.1:8000/faculty/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ id: id, decision: decision })
+      });
+      const result = await res.json();
+      alert(result.message);
+      window.location.reload();
+    }
+
+    loadRequests();
+  </script>
+   <footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+</body>
+</html>

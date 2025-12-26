@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Faculty Outing Requests</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Faculty Outing Requests</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Roll No</th>
+            <th>Branch</th>
+            <th>Reason</th>
+            <th>Parent Status</th>
+            <th>Faculty Action</th>
+        </tr>
+        {% for req in requests %}
+        <tr>
+            <td>{{ req.name }}</td>
+            <td>{{ req.roll_no }}</td>
+            <td>{{ req.branch }}</td>
+            <td>{{ req.reason }}</td>
+            <td>{{ req.parent_status or 'Pending' }}</td>
+            <td>
+                <form action="/faculty/update-status" method="post" style="display:inline;">
+                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                    <button type="submit" name="status" value="Accepted">Accept</button>
+                    <button type="submit" name="status" value="Denied">Deny</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

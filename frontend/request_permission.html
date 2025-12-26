@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Outing Request | BIO-PASS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    h1 {
+      color: #0b3d91;
+    }
+
+    form {
+      background-color: white;
+      display: inline-block;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    textarea, input {
+      display: block;
+      width: 300px;
+      padding: 10px;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 320px;
+      padding: 10px;
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #msg {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+    }
+
+    #status-bar {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+
+    #status-text {
+      font-weight: bold;
+    }
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+
+    .status-submitted { color: orange; }
+    .status-parent { color: darkorange; }
+    .status-faculty { color: steelblue; }
+    .status-approved { color: green; }
+    .status-rejected { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Request Outing Permission</h1>
+
+  <form id="requestForm">
+    <input type="hidden" id="email" name="email" />
+    <textarea id="reason" name="reason" placeholder="Reason for outing..." required></textarea>
+    <input type="datetime-local" id="from_time" name="from_time" required />
+    <input type="datetime-local" id="to_time" name="to_time" required />
+    <button type="submit">Submit Request</button>
+    <p id="msg"></p>
+  </form>
+
+  <div id="status-bar">
+    <p>Status: <span id="status-text">Loading...</span></p>
+  </div>
+
+  <script>
+    // Get student email from localStorage
+    const email = localStorage.getItem("studentEmail");
+    document.getElementById("email").value = email;
+
+    // Submit outing request
+    document.getElementById("requestForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const form = document.getElementById("requestForm");
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/student/request-permission", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById("msg").innerText = "Request submitted!";
+          fetchStatus();
+        } else {
+          document.getElementById("msg").innerText = result.detail || "Submission failed";
+        }
+      } catch (error) {
+        document.getElementById("msg").innerText = "Something went wrong.";
+      }
+    });
+
+    // Fetch current request status
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/student/status?email=${email}`);
+        const data = await res.json();
+        const statusEl = document.getElementById("status-text");
+
+        const status = data.status.toLowerCase();
+        statusEl.innerText = data.status;
+
+        statusEl.className = "";
+        if (status === "submitted") statusEl.classList.add("status-submitted");
+        else if (status === "parent accepted") statusEl.classList.add("status-parent");
+        else if (status === "faculty pending") statusEl.classList.add("status-faculty");
+        else if (status === "approved") statusEl.classList.add("status-approved");
+        else if (status === "rejected") statusEl.classList.add("status-rejected");
+        else statusEl.innerText = "No request found";
+      } catch (err) {
+        document.getElementById("status-text").innerText = "Error fetching status";
+      }
+    }
+
+    fetchStatus();  // Load status when page opens
+  </script>
+  <footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+</body>
+</html>

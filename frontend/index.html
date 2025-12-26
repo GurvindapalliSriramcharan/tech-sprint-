@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BIO-PASS | Welcome</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      color: #0b3d91;
+    }
+    .btn {
+      display: block;
+      margin: 20px auto;
+      padding: 15px 30px;
+      width: 200px;
+      font-size: 16px;
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 15px;
+      color: gray;
+    }
+    header img {
+      height: 60px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://cdn.prod.website-files.com/60af144c343b5fdc5513a640/62201bb0b4baad0916cfc7bb_03c756_0a279644d7694f22996bd152f6f8b6be_mv2.png" alt="VNRVJIET Logo" />
+    <h1>Welcome to BIO-PASS</h1>
+  </header>
+
+ <button class="btn" onclick="chooseStudentAction()">Student</button>
+
+<script>
+  function chooseStudentAction() {
+    const choice = confirm("Press OK to Login, or Cancel to Sign Up.");
+    if (choice) {
+      // OK clicked
+      window.location.href = "student_login.html";
+    } else {
+      // Cancel clicked
+      window.location.href = "student.html";
+    }
+  }
+</script>
+
+
+ <button class="btn" onclick="location.href='parent_verify_otp.html'">Parent</button>
+
+  <button class="btn" onclick="location.href='faculty_portal.html'">Faculty</button>
+
+  <button class="btn" onclick="location.href='security.html'">Security</button>
+
+  <footer>
+    - Project by G.SRIRAMCHARAN 24071a6691
+  </footer>
+
+</body>
+</html>
